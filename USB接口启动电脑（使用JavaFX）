@@ -1,0 +1,175 @@
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+interface USB {
+    void turnOn();
+
+    void turnOff();
+
+    boolean isOn();
+}
+
+class Mouse implements USB {
+    private String name;
+    private boolean isOn;
+
+    public Mouse(String name) {
+        this.name = name;
+        this.isOn = false;
+    }
+
+    @Override
+    public void turnOn() {
+        isOn = true;
+    }
+
+    @Override
+    public void turnOff() {
+        isOn = false;
+    }
+
+    public boolean isOn() {
+        return isOn;
+    }
+}
+
+class Keyboard implements USB {
+    private String name;
+    private boolean isOn;
+
+    public Keyboard(String name) {
+        this.name = name;
+        this.isOn = false;
+    }
+
+    @Override
+    public void turnOn() {
+        isOn = true;
+    }
+
+    @Override
+    public void turnOff() {
+        isOn = false;
+    }
+
+    public boolean isOn() {
+        return isOn;
+    }
+}
+
+class Printer implements USB {
+    private String name;
+    private boolean isOn;
+
+    public Printer(String name) {
+        this.name = name;
+        this.isOn = false;
+    }
+
+    @Override
+    public void turnOn() {
+        isOn = true;
+    }
+
+    @Override
+    public void turnOff() {
+        isOn = false;
+    }
+
+    public boolean isOn() {
+        return isOn;
+    }
+}
+
+class Computer {
+    private USB[] usbDevices;
+
+    public Computer() {
+        usbDevices = new USB[3];
+    }
+
+    public void addUSBDevice(USB device, int index) {
+        if (index >= 0 && index < usbDevices.length) {
+            usbDevices[index] = device;
+        }
+    }
+
+    public boolean allDevicesOn() {
+        for (USB device : usbDevices) {
+            if (device == null || !device.isOn()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void powerOn() {
+        if (allDevicesOn()) {
+            System.out.println("电脑已经开机");
+        } else {
+            System.out.println("不能开机，有设备未开机");
+        }
+    }
+
+    public void powerOff() {
+        for (USB device : usbDevices) {
+            if (device != null) {
+                device.turnOff();
+            }
+        }
+        System.out.println("电脑已经关机");
+    }
+}
+
+public class USBVisualizationApp extends Application {
+    private Computer computer;
+    private VBox deviceStatusBox;
+    private Button powerButton;
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+        Mouse mouse = new Mouse("Logitech");
+        Keyboard keyboard = new Keyboard("Dell");
+        Printer printer = new Printer("Epson");
+
+        computer = new Computer();
+        computer.addUSBDevice(mouse, 0);
+        computer.addUSBDevice(keyboard, 1);
+        computer.addUSBDevice(printer, 2);
+
+        primaryStage.setTitle("USB Visualization");
+        deviceStatusBox = new VBox();
+        powerButton = new Button("开机");
+
+        updateDeviceStatus();
+
+        powerButton.setOnAction(event -> {
+            if (computer.allDevicesOn()) {
+                computer.powerOn();
+                updateDeviceStatus();
+            }
+        });
+
+        HBox root = new HBox(deviceStatusBox, powerButton);
+        Scene scene = new Scene(root, 400, 200);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    private void updateDeviceStatus() {
+        deviceStatusBox.getChildren().clear();
+        for (USB device : computer.getUsbDevices()) {
+            String status = device.isOn() ? "开机" : "关机";
+            Label label = new Label(device.getClass().getSimpleName() + ": " + status);
+            deviceStatusBox.getChildren().add(label);
+        }
+    }
+}
